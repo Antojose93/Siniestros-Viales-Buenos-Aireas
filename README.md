@@ -44,4 +44,4 @@ El análisis se llevó a cabo en varias etapas, que incluyen:
 Ejecución del Proyecto
 ----------------------
 `pip install requirements.txt`
-`streamlit run introduccion.py`
+`streamlit run main.py`

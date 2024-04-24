@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 from streamlit_folium import st_folium
 import matplotlib.pyplot as plt
+import altair as alt
 
 
 def filtrar(dataframe,años_seleccionados,tipos_via_seleccionados,victimas_seleccionados,comunas_seleccionadas):
@@ -19,21 +20,7 @@ def filtrar(dataframe,años_seleccionados,tipos_via_seleccionados,victimas_selec
         dataframe_filtrado = dataframe_filtrado[dataframe_filtrado['COMUNA'].isin(comunas_seleccionadas)]
     return dataframe_filtrado
     
-def asignar_color(victima):
-    if "MOTO" in victima:
-        return "red"
-    elif "AUTO" in victima:
-        return "blue"
-    elif "PEATON" in victima:
-        return "yellow"
-    elif "CARGA" in victima:
-        return "orange"
-    elif "BICICLETA" in victima:
-        return "green"
-    elif "PASAJEROS" in victima:
-        return "brown"
-    else:
-        return "lightgray"
+
 
 def plot_map(df):
     """
@@ -69,29 +56,41 @@ def plot_map(df):
     except Exception as e:
         return st.write("Error al generar el mapa: " + str(e))
 
-def plot_bar_chart(dataframe):
-    # Contar el número de accidentes por año
-    accidents_per_street_type = dataframe['TIPO_DE_CALLE'].value_counts().sort_index()
+def MuertesPorTipoDeCalle(dataframe):
+    # Contar el número de accidentes por tipo de calle y ordenar por índice
+    accidents_per_street_type = dataframe['TIPO_DE_CALLE'].value_counts().sort_index().reset_index()
+    accidents_per_street_type.columns = ['Tipo de Calle', 'Número de Accidentes']
+    customColors = ['#2b8186', '#459a9f', '#92e3e8' , '#78cbd0']
+    # Crear el gráfico de barras con Altair
+    chart = alt.Chart(accidents_per_street_type).mark_bar().encode(
+        x=alt.X('Tipo de Calle:N', title='Tipo de Calle'),
+        y=alt.Y('Número de Accidentes:Q', title='Número de Accidentes'),
+        color=alt.Color('Tipo de Calle:N', scale=alt.Scale(range=customColors))
+    ).properties(
+        title='Número de Accidentes por Tipo de Calle'
+    ).configure_axis(
+        labelAngle=45
+    )
     
-    # Graficar
-    fig, ax = plt.subplots()
-    ax.bar(accidents_per_street_type.index, accidents_per_street_type.values)
-    ax.set_xlabel('Tipo de Calle')
-    ax.set_ylabel('Número de Accidentes')
-    ax.set_title('Número de Accidentes por Tipo de Calle')
-    plt.xticks(rotation=45, ha='right')
-    return st.pyplot(fig)
+    return st.altair_chart(chart, use_container_width=True) 
 
-def plot_bar_chart2(dataframe):
-    # Contar el número de accidentes por tipo de calle
+def MuertesPorComuna(dataframe):
+    # Contar el número de accidentes por comuna
     dataframe['COMUNA'] = dataframe['COMUNA'].map(lambda x: f'Comuna_{x}')
-    accidents_per_street_type = dataframe['COMUNA'].value_counts().sort_index()
+    accidents_per_comuna = dataframe['COMUNA'].value_counts().sort_index().reset_index()
+    accidents_per_comuna.columns = ['Comuna', 'Número de Accidentes']
     
-    # Graficar
-    fig, ax = plt.subplots()
-    ax.bar(accidents_per_street_type.index, accidents_per_street_type.values)
-    ax.set_xlabel('Comuna')
-    ax.set_ylabel('Número de Accidentes')
-    ax.set_title('Número de Accidentes por Comuna')
-    plt.xticks(rotation=45, ha='right')
-    return st.pyplot(fig)
+    customColors = ['#2b8186', '#459a9f', '#92e3e8', '#78cbd0']
+    
+    # Crear el gráfico de barras con Altair
+    chart = alt.Chart(accidents_per_comuna).mark_bar().encode(
+        x=alt.X('Comuna:N', title='Comuna'),
+        y=alt.Y('Número de Accidentes:Q', title='Número de Accidentes'),
+        color=alt.Color('Comuna:N', scale=alt.Scale(range=customColors))
+    ).properties(
+        title='Número de Accidentes por Comuna'
+    ).configure_axis(
+        labelAngle=45
+    )
+    
+    return st.altair_chart(chart, use_container_width=True)

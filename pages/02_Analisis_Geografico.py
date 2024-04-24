@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
-from utils.Graficas1 import plot_map , filtrar ,plot_bar_chart, plot_bar_chart2
+from utils.Graficas1 import plot_map , filtrar ,MuertesPorTipoDeCalle, MuertesPorComuna
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 # Cargar datos
@@ -32,7 +32,8 @@ st.markdown("""
 # Verificar si hay valores seleccionados en las variables de selección
 if len(años_seleccionados) > 0 or len(tipo_via_seleccionado) > 0 or len(tipo_victima_seleccionado) > 0 or len(comuna_seleccionada) > 0:
     dfiltrado = filtrar(dfiltrado,años_seleccionados,tipo_via_seleccionado,tipo_victima_seleccionado,comuna_seleccionada)
-st.write(f"**Total Homicidios:** {len(dfiltrado)}")
+st.write(f"**Total de Accidentes:** <h2><font color='red'>{len(dfiltrado)}</font></h2>", unsafe_allow_html=True)
+
 
 #st.write(dfiltrado) 
 
@@ -44,11 +45,11 @@ col1, col2 = st.columns(2)
 # Genera el primer gráfico en la primera columna
 with col1:
     if len(dfiltrado['TIPO_DE_CALLE'].unique()) > 2:
-        plot_bar_chart(dfiltrado)
+        MuertesPorTipoDeCalle(dfiltrado)
 
 # Genera el segundo gráfico en la segunda columna
 with col2:
     if len(dfiltrado['COMUNA'].unique()) > 2:
-     plot_bar_chart2(dfiltrado)
+     MuertesPorComuna(dfiltrado)
 
 
